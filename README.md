@@ -1,4 +1,4 @@
-# Dependable
+# Dependable [![Build Status](https://travis-ci.org/idottv/dependable.png)](https://travis-ci.org/idottv/dependable)
 
 A minimalist dependency injection framework for node.js.
 
