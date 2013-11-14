@@ -111,7 +111,7 @@ describe 'inject', ->
     catch e
       err = e
 
-    assert.ok err
+    assert.ok err.toString().match 'circular dependency'
 
   it "should NOT throw circular dependency error if two modules require the same thing", ->
     deps = container()
