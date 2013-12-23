@@ -25,6 +25,17 @@ container.register('transport', {
 });
 ```
 
+### Register specific dependencies
+
+Register declared depencencies with an dependency name array
+
+```js
+container.register('occupation', 'tax attorney');
+container.register('transport', function(){
+	return arguments[0];
+}, ['occupation']);
+```
+
 ### Register a dependency that has other dependencies
 
 When the argument is a function, the function's arguments are automatically

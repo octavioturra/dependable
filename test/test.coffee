@@ -299,4 +299,55 @@ describe 'inject', ->
     it 'should support objects/data instead of functions?'
     it 'should support optional dependencies?'
 
-
+  
+	describe 'custom dependencies', ->
+		it 'should register a function with an array of dependencies', ->
+			deps = container()
+			customAbc = {
+				a: "a"
+				b: "b"
+			}
+			abc = ->
+				assert.equal arguments[0].a, "a"
+				assert.equal arguments[0].b, "b"
+			deps.register "customAbc", customAbc
+			deps.register "Abc", abc, ["customAbc"]
+			
+			
+		it 'should register a function with variou intems in an array of dependencies', ->
+			deps = container()
+			customAbc = {
+				a: "a",
+				b: "b"
+			}
+			customDef = {
+				d: "d",
+				e: "e"
+			}
+			abc = ->
+				assert.equal arguments[0].a, "a"
+				assert.equal arguments[0].b, "b"
+				assert.equal arguments[1].d, "d"
+				assert.equal arguments[1].e, "e"
+			deps.register "customAbc", customAbc
+			deps.register "customDef", customDef
+			deps.register "Abc", abc, ["customAbc", "customDef"]
+			
+		it 'should respect the order of array dependencies', ->
+			deps = container()
+			customAbc = {
+				a: "a",
+				b: "b"
+			}
+			customDef = {
+				d: "d",
+				e: "e"
+			}
+			abc = ->
+				assert.equal arguments[0].a, "d"
+				assert.equal arguments[0].b, "e"
+				assert.equal arguments[1].d, "a"
+				assert.equal arguments[1].e, "b"
+			deps.register "customAbc", customAbc
+			deps.register "customDef", customDef
+			deps.register "Abc", abc, ["customDef", "customAbc"]

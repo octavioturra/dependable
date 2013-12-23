@@ -12,17 +12,17 @@ exports.container = ->
   ## REGISTER / PARSE ################################################
 
   # register it! Parse it for dependencies
-  register = (name, func) ->
+  register = (name, func, args) ->
     if name == Object name
       hash = name
       for name, func of hash
-        registerOne name, func
+        registerOne name, func, args
     else
-      registerOne name, func
+      registerOne name, func, args
 
-  registerOne = (name, func) ->
+  registerOne = (name, func, args) ->
     if not func? then throw new Error "cannot register null function"
-    factories[name] = toFactory func
+    factories[name] = toFactory func, args
 
   load = (file) ->
     exists = existsSync file
@@ -47,10 +47,13 @@ exports.container = ->
       stats = fs.statSync file
       if stats.isFile() then loadfile file
 
-  toFactory = (func) ->
+  toFactory = (func, args) ->
     if typeof func is "function"
       func: func
       required: argList func
+    else if args
+      func: func
+      required: args
     else
       func: -> func
       required: []

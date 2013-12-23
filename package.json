@@ -8,8 +8,8 @@
     "url": "git@github.com:idottv/dependable.git"
   },
   "scripts": {
-    "test": "node_modules/.bin/mocha -R spec --compilers coffee:coffee-script test/*",
-    "prepublish": "node_modules/.bin/coffee -c index.coffee"
+    "test": "mocha -R spec --compilers coffee:coffee-script test/test.coffee",
+    "prepublish": "coffee -c index.coffee"
   },
   "license": "MIT",
   "dependencies": {
