@@ -171,6 +171,8 @@ container.resolve(function(car, Car){
 
 `container.load(fileOrFolder)` - Registers a file, using its file name as the name, or all files in a folder. Does not traverse subdirectories.
 
+`container.loadClass(fileOrFolder)` - Registers a class in a file, using its file name as the name, or all files in a folder. Does not traverse subdirectories.
+
 `container.get(name, overrides = {})` - Returns a dependency by name, with all dependencies injected. If you specify overrides, the dependency will be given those overrides instead of those registered.
 
 `container.resolve(overrides={}, cb)` - Calls `cb` like a dependency function, injecting any dependencies found in the signature. Like `container.get`, this supports overrides.

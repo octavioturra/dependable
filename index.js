@@ -9,7 +9,7 @@
   existsSync = (_ref = fs.existsSync) != null ? _ref : path.existsSync;
 
   exports.container = function() {
-    var argList, container, factories, get, haveVisited, load, loaddir, loadfile, notEmpty, register, registerClass, registerOne, resolve, toFactory, toService;
+    var argList, container, factories, get, haveVisited, load, loadClassFile, loaddir, loadfile, notEmpty, register, registerClass, registerOne, resolve, toFactory;
     factories = {};
     register = function(name, func, args) {
       var hash, _results;
@@ -26,9 +26,16 @@
       }
     };
     registerClass = function(name, func, args) {
-      if (name[0].toUpperCase() === name[0] && typeof func === "function") {
-        return toService(func, args);
+      var binded, proto;
+      if (name[0].toUpperCase() !== name[0]) {
+        name = func.name[0].toUpperCase() + func.name.substr(1);
       }
+      proto = Object.create(func.prototype);
+      binded = func.bind(proto);
+      resolve(binded, argList(func));
+      register(func.name, func, args);
+      name = func.name[0].toLowerCase() + func.name.substr(1);
+      return register(name, proto);
     };
     registerOne = function(name, func, args) {
       if (!(func != null)) {
@@ -54,6 +61,14 @@
         return letter.toUpperCase();
       });
       return register(name, require(module));
+    };
+    loadClassFile = function(file) {
+      var module, name;
+      module = file.replace(/\.\w+$/, "");
+      name = path.basename(module).replace(/\-(\w)/g, function(match, letter) {
+        return letter.toUpperCase();
+      });
+      return registerClass(name, require(module));
     };
     loaddir = function(dir) {
       var file, filenames, files, stats, _i, _len, _results;
@@ -95,15 +110,6 @@
           required: []
         };
       }
-    };
-    toService = function(func, args) {
-      var binded, name, proto;
-      proto = Object.create(func.prototype);
-      binded = func.bind(proto);
-      resolve(binded, argList(func));
-      register(func.name, func, args);
-      name = func.name[0].toLowerCase() + func.name.substr(1);
-      return register(name, proto);
     };
     argList = function(func) {
       var match, required;
@@ -170,7 +176,8 @@
       resolve: resolve,
       register: register,
       registerClass: registerClass,
-      load: load
+      load: load,
+      loadClassFile: loadClassFile
     };
     container.register("_container", container);
     return container;

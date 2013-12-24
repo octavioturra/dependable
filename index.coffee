@@ -21,8 +21,17 @@ exports.container = ->
       registerOne name, func, args
   
   registerClass = (name, func, args)->
-    if name[0].toUpperCase() is name[0] and typeof func is "function"
-      toService func, args
+    unless name[0].toUpperCase() is name[0]
+      name = func.name[0].toUpperCase() + func.name.substr 1
+      
+    proto = Object.create func.prototype
+    binded = func.bind proto
+    resolve binded, argList func
+    
+    register func.name, func, args
+    
+    name = func.name[0].toLowerCase() + func.name.substr 1
+    register name, proto
     
   registerOne = (name, func, args) ->
     if not func? then throw new Error "cannot register null function"
@@ -42,6 +51,14 @@ exports.container = ->
     name = path.basename(module).replace(/\-(\w)/g, (match, letter) -> letter.toUpperCase())
 
     register name, require(module)
+    
+  loadClassFile = (file)->
+    module = file.replace(/\.\w+$/, "")
+
+    # Remove dashes from files and camelcase results
+    name = path.basename(module).replace(/\-(\w)/g, (match, letter) -> letter.toUpperCase())
+
+    registerClass name, require(module)
 
   loaddir = (dir) ->
     filenames = fs.readdirSync dir
@@ -61,17 +78,6 @@ exports.container = ->
     else
       func: -> func
       required: []
-
-  toService = (func, args) ->
-    
-    proto = Object.create func.prototype
-    binded = func.bind proto
-    resolve binded, argList func
-    
-    register func.name, func, args
-    
-    name = func.name[0].toLowerCase() + func.name.substr 1
-    register name, proto
       
   argList = (func) ->
     # match over multiple lines
@@ -139,6 +145,7 @@ exports.container = ->
     register: register
     registerClass: registerClass
     load: load
+    loadClassFile: loadClassFile
 
   # let people access the container if the know what they're doing
   container.register "_container", container

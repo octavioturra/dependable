@@ -384,3 +384,6 @@ describe 'inject', ->
 				assert test.b, "b"
 				assert test.doSomething, "a"
 				assert typeof Test, "function"
+        
+  describe 'class file', ->
+    it 'should load a class from a file'
