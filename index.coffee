@@ -19,7 +19,11 @@ exports.container = ->
         registerOne name, func, args
     else
       registerOne name, func, args
-
+  
+  registerInstance = (name, func, args)->
+    if name[0].toUpperCase() is name[0] and typeof func is "function"
+      toService func, args
+    
   registerOne = (name, func, args) ->
     if not func? then throw new Error "cannot register null function"
     factories[name] = toFactory func, args
@@ -58,6 +62,17 @@ exports.container = ->
       func: -> func
       required: []
 
+  toService = (func, args) ->
+    
+    proto = Object.create func.prototype
+    binded = func.bind proto
+    resolve binded, argList func
+    
+    register func.name, func, args
+    
+    name = func.name[0].toLowerCase() + func.name.substr 1
+    register name, proto
+      
   argList = (func) ->
     # match over multiple lines
     match = func.toString().match /function.*?\(([\s\S]*?)\)/
@@ -109,17 +124,20 @@ exports.container = ->
 
   ## RESOLVE ##########################################################
 
-  resolve = (overrides, func) ->
+  resolve = (overrides, func, args) ->
     if not func
       func = overrides
       overrides = null
-    register "__temp", func
+      args = args
+      
+    register "__temp", func, args
     get "__temp", overrides
 
   container =
     get: get
     resolve: resolve
     register: register
+    registerInstance: registerInstance
     load: load
 
   # let people access the container if the know what they're doing

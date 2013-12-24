@@ -23,7 +23,7 @@ describe 'inject', ->
     deps.register "names", Names
     assert.equal deps.get("stuff"), "one"
 
-  it 'should resovle multiple dependencies', ->
+  it 'should resolve multiple dependencies', ->
     post = (Comments, Users) ->
       class Post
         constructor: (@comments, @author) ->
@@ -298,8 +298,7 @@ describe 'inject', ->
   describe 'maybe', ->
     it 'should support objects/data instead of functions?'
     it 'should support optional dependencies?'
-
-  
+			
 	describe 'custom dependencies', ->
 		it 'should register a function with an array of dependencies', ->
 			deps = container()
@@ -317,11 +316,11 @@ describe 'inject', ->
 		it 'should register a function with variou intems in an array of dependencies', ->
 			deps = container()
 			customAbc = {
-				a: "a",
+				a: "a"
 				b: "b"
 			}
 			customDef = {
-				d: "d",
+				d: "d"
 				e: "e"
 			}
 			abc = ->
@@ -336,11 +335,11 @@ describe 'inject', ->
 		it 'should respect the order of array dependencies', ->
 			deps = container()
 			customAbc = {
-				a: "a",
+				a: "a"
 				b: "b"
 			}
 			customDef = {
-				d: "d",
+				d: "d"
 				e: "e"
 			}
 			abc = ->
@@ -351,3 +350,36 @@ describe 'inject', ->
 			deps.register "customAbc", customAbc
 			deps.register "customDef", customDef
 			deps.register "Abc", abc, ["customDef", "customAbc"]
+			
+		it 'shoud resolve custom dependencies', ->
+			deps = container()
+			customAbc = {
+				a: "a"
+				b: "b"
+			}
+			abc = ->
+				assert.equal arguments[0].a, "a"
+				assert.equal arguments[0].b, "b"
+			
+			deps.register "customAbc", customAbc
+			deps.resolve abc, ["customAbc"]
+			
+	describe 'class registering', ->
+		it 'should register a class as its instance', ->
+			deps = container()
+			class Test
+				abc : {
+					a: "a"
+				}
+
+				b: "b"
+
+				doSomething : ()=>
+					@a
+				
+			deps.registerInstance "Test", Test
+			
+			deps.resolve (test)->
+				assert test.abc.a, "a"
+				assert test.b, "b"
+				assert test.doSomething, "a"
