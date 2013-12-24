@@ -9,27 +9,32 @@
   existsSync = (_ref = fs.existsSync) != null ? _ref : path.existsSync;
 
   exports.container = function() {
-    var argList, container, factories, get, haveVisited, load, loaddir, loadfile, notEmpty, register, registerOne, resolve, toFactory;
+    var argList, container, factories, get, haveVisited, load, loaddir, loadfile, notEmpty, register, registerClass, registerOne, resolve, toFactory, toService;
     factories = {};
-    register = function(name, func) {
+    register = function(name, func, args) {
       var hash, _results;
       if (name === Object(name)) {
         hash = name;
         _results = [];
         for (name in hash) {
           func = hash[name];
-          _results.push(registerOne(name, func));
+          _results.push(registerOne(name, func, args));
         }
         return _results;
       } else {
-        return registerOne(name, func);
+        return registerOne(name, func, args);
       }
     };
-    registerOne = function(name, func) {
+    registerClass = function(name, func, args) {
+      if (name[0].toUpperCase() === name[0] && typeof func === "function") {
+        return toService(func, args);
+      }
+    };
+    registerOne = function(name, func, args) {
       if (!(func != null)) {
         throw new Error("cannot register null function");
       }
-      return factories[name] = toFactory(func);
+      return factories[name] = toFactory(func, args);
     };
     load = function(file) {
       var exists, stats;
@@ -71,11 +76,16 @@
       }
       return _results;
     };
-    toFactory = function(func) {
+    toFactory = function(func, args) {
       if (typeof func === "function") {
         return {
           func: func,
           required: argList(func)
+        };
+      } else if (args) {
+        return {
+          func: func,
+          required: args
         };
       } else {
         return {
@@ -85,6 +95,15 @@
           required: []
         };
       }
+    };
+    toService = function(func, args) {
+      var binded, name, proto;
+      proto = Object.create(func.prototype);
+      binded = func.bind(proto);
+      resolve(binded, argList(func));
+      register(func.name, func, args);
+      name = func.name[0].toLowerCase() + func.name.substr(1);
+      return register(name, proto);
     };
     argList = function(func) {
       var match, required;
@@ -137,18 +156,20 @@
       };
       return visited.filter(isName).length;
     };
-    resolve = function(overrides, func) {
+    resolve = function(overrides, func, args) {
       if (!func) {
         func = overrides;
         overrides = null;
+        args = args;
       }
-      register("__temp", func);
+      register("__temp", func, args);
       return get("__temp", overrides);
     };
     container = {
       get: get,
       resolve: resolve,
       register: register,
+      registerClass: registerClass,
       load: load
     };
     container.register("_container", container);

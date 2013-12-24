@@ -377,9 +377,10 @@ describe 'inject', ->
 				doSomething : ()=>
 					@a
 				
-			deps.registerInstance "Test", Test
+			deps.registerClass "Test", Test
 			
-			deps.resolve (test)->
+			deps.resolve (test, Test)->
 				assert test.abc.a, "a"
 				assert test.b, "b"
 				assert test.doSomething, "a"
+				assert typeof Test, "function"

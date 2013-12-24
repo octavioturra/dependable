@@ -60,6 +60,7 @@ container.register('song', function (occupation, transport, legalStatus) {
 
 ### Register a dependency out-of-order
 
+
 `song` depends on a `legalStatus`, which hasn't been registered yet.
 Dependable resolves dependencies lazily, so we can define this dependency
 after-the-fact:
@@ -132,11 +133,41 @@ container.resolve({ transport: horse }, function (song) {
 
 Sounds like a hit!
 
+### Register a class to have its instance
+
+It's useful when you have a class and needs a instance of this, with its constructor resolved at runtime.
+
+```js
+//Javascript's class style
+var Car = function(){
+  function Car(model){
+    this.model = model;
+  }
+  Car.prototype.model = '';
+  
+  Car.prototype.getModel = function(){
+    return this.model;
+  };
+};
+
+container.register('model', 'super-car');
+
+container.registerClass('Car', Car);
+
+container.resolve(function(car, Car){
+  //car is an instance of Car
+  //Car is the raw class
+});
+
+```
+
 ## API
 
 `container.register(name, function)` - Registers a dependency by name. `function` can be a function that takes dependencies and returns anything, or an object itself with no dependencies.
 
 `container.register(hash)` - Registers a hash of names and dependencies. This is useful for setting configuration constants.
+
+`container.registerClass(Name, Class)` - Registers a hash of names and dependencies. This is useful for setting configuration constants.
 
 `container.load(fileOrFolder)` - Registers a file, using its file name as the name, or all files in a folder. Does not traverse subdirectories.
 

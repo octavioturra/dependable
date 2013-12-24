@@ -20,7 +20,7 @@ exports.container = ->
     else
       registerOne name, func, args
   
-  registerInstance = (name, func, args)->
+  registerClass = (name, func, args)->
     if name[0].toUpperCase() is name[0] and typeof func is "function"
       toService func, args
     
@@ -137,7 +137,7 @@ exports.container = ->
     get: get
     resolve: resolve
     register: register
-    registerInstance: registerInstance
+    registerClass: registerClass
     load: load
 
   # let people access the container if the know what they're doing
