@@ -28,15 +28,15 @@
     registerClass = function(name, func, args) {
       var binded, proto;
       if (name[0].toUpperCase() !== name[0]) {
-        name = name[0].toUpperCase() + name.substr(1);
+        name = func.name[0].toUpperCase() + func.name.substr(1);
       }
-      args = args || (argList(func));
+      args = args || arglist(func);
       proto = Object.create(func.prototype);
       binded = func.bind(proto);
-      register(name, func);
-      name = name[0].toLowerCase() + name.substr(1);
-      register(name, proto);
-      return resolve(binded, args);
+      resolve(binded, args);
+      register(func.name, func, args);
+      name = func.name[0].toLowerCase() + func.name.substr(1);
+      return register(name, proto);
     };
     registerOne = function(name, func, args) {
       if (!(func != null)) {
@@ -171,8 +171,8 @@
       get: get,
       resolve: resolve,
       register: register,
-      load: load,
       registerClass: registerClass,
+      load: load,
       loadClassFile: loadClassFile
     };
     container.register("_container", container);

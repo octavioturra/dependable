@@ -22,17 +22,17 @@ exports.container = ->
   
   registerClass = (name, func, args)->
     unless name[0].toUpperCase() is name[0]
-      name = func.name[0].toUpperCase() + func.name.substr 1
+      name = name[0].toUpperCase() + name.substr 1
       
-    proto = Object.create func.prototype
+    args = args || (argList func)
+    
+    proto = Object  .create func.prototype
     binded = func.bind proto
-    resolve binded, argList func
-    
-    register func.name, func, args
-    
-    name = func.name[0].toLowerCase() + func.name.substr 1
+    register name, func
+    name = name[0].toLowerCase() + name.substr 1
     register name, proto
-    
+    resolve binded, args
+
   registerOne = (name, func, args) ->
     if not func? then throw new Error "cannot register null function"
     factories[name] = toFactory func, args
@@ -71,10 +71,7 @@ exports.container = ->
   toFactory = (func, args) ->
     if typeof func is "function"
       func: func
-      required: argList func
-    else if args
-      func: func
-      required: args
+      required: args || argList func
     else
       func: -> func
       required: []
@@ -131,10 +128,10 @@ exports.container = ->
   ## RESOLVE ##########################################################
 
   resolve = (overrides, func, args) ->
-    if not func
+    if not args
+      args = func
       func = overrides
       overrides = null
-      args = args
       
     register "__temp", func, args
     get "__temp", overrides
@@ -143,8 +140,8 @@ exports.container = ->
     get: get
     resolve: resolve
     register: register
-    registerClass: registerClass
     load: load
+    registerClass: registerClass
     loadClassFile: loadClassFile
 
   # let people access the container if the know what they're doing

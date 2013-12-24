@@ -209,14 +209,12 @@ describe 'inject', ->
       assert.notEqual overridenA.value, "b", 'it used the cached value'
       assert.equal overridenA.value, "henry"
 
-    it 'should override on resolve', (done) ->
+    it 'should override on resolve', ->
       deps = container()
       deps.register "a", (b) -> value: b
       deps.register "b", "b"
       deps.resolve {b: "bob"}, (a) ->
         assert.equal a.value, "bob"
-        done()
-
 
   describe 'file helpers', ->
     it 'should let you register a file', (done) ->
@@ -298,92 +296,108 @@ describe 'inject', ->
   describe 'maybe', ->
     it 'should support objects/data instead of functions?'
     it 'should support optional dependencies?'
-			
-	describe 'custom dependencies', ->
-		it 'should register a function with an array of dependencies', ->
-			deps = container()
-			customAbc = {
-				a: "a"
-				b: "b"
-			}
-			abc = ->
-				assert.equal arguments[0].a, "a"
-				assert.equal arguments[0].b, "b"
-			deps.register "customAbc", customAbc
-			deps.register "Abc", abc, ["customAbc"]
-			
-			
-		it 'should register a function with variou intems in an array of dependencies', ->
-			deps = container()
-			customAbc = {
-				a: "a"
-				b: "b"
-			}
-			customDef = {
-				d: "d"
-				e: "e"
-			}
-			abc = ->
-				assert.equal arguments[0].a, "a"
-				assert.equal arguments[0].b, "b"
-				assert.equal arguments[1].d, "d"
-				assert.equal arguments[1].e, "e"
-			deps.register "customAbc", customAbc
-			deps.register "customDef", customDef
-			deps.register "Abc", abc, ["customAbc", "customDef"]
-			
-		it 'should respect the order of array dependencies', ->
-			deps = container()
-			customAbc = {
-				a: "a"
-				b: "b"
-			}
-			customDef = {
-				d: "d"
-				e: "e"
-			}
-			abc = ->
-				assert.equal arguments[0].a, "d"
-				assert.equal arguments[0].b, "e"
-				assert.equal arguments[1].d, "a"
-				assert.equal arguments[1].e, "b"
-			deps.register "customAbc", customAbc
-			deps.register "customDef", customDef
-			deps.register "Abc", abc, ["customDef", "customAbc"]
-			
-		it 'shoud resolve custom dependencies', ->
-			deps = container()
-			customAbc = {
-				a: "a"
-				b: "b"
-			}
-			abc = ->
-				assert.equal arguments[0].a, "a"
-				assert.equal arguments[0].b, "b"
-			
-			deps.register "customAbc", customAbc
-			deps.resolve abc, ["customAbc"]
-			
-	describe 'class registering', ->
-		it 'should register a class as its instance', ->
-			deps = container()
-			class Test
-				abc : {
-					a: "a"
-				}
+      
+  describe 'custom dependencies', ->
+    it 'should register a function with an array of dependencies', ->
+      deps = container()
+      customAbc = {
+        a: "a"
+        b: "b"
+      }
+      abc = ->
+        assert.equal arguments[0].a, "a"
+        assert.equal arguments[0].b, "b"
+      deps.register "customAbc", customAbc
+      deps.register "Abc", abc, ["customAbc"]
+      
+      
+    it 'should register a function with variou intems in an array of dependencies', ->
+      deps = container()
+      customAbc = {
+        a: "a"
+        b: "b"
+      }
+      customDef = {
+        d: "d"
+        e: "e"
+      }
+      abc = ->
+        assert.equal arguments[0].a, "a"
+        assert.equal arguments[0].b, "b"
+        assert.equal arguments[1].d, "d"
+        assert.equal arguments[1].e, "e"
+      deps.register "customAbc", customAbc
+      deps.register "customDef", customDef
+      deps.register "Abc", abc, ["customAbc", "customDef"]
+      
+    it 'should respect the order of array dependencies', ->
+      deps = container()
+      customAbc = {
+        a: "a"
+        b: "b"
+      }
+      customDef = {
+        d: "d"
+        e: "e"
+      }
+      abc = ->
+        assert.equal arguments[0].a, "d"
+        assert.equal arguments[0].b, "e"
+        assert.equal arguments[1].d, "a"
+        assert.equal arguments[1].e, "b"
+      deps.register "customAbc", customAbc
+      deps.register "customDef", customDef
+      deps.register "Abc", abc, ["customDef", "customAbc"]
+      
+    it 'shoud resolve custom dependencies', ->
+      deps = container()
+      customAbc = {
+        a: "a"
+        b: "b"
+      }
+      abc = ->
+        assert.equal arguments[0].a, "a"
+        assert.equal arguments[0].b, "b"
+      
+      deps.register "customAbc", customAbc
+      deps.resolve abc, ["customAbc"]
+      
+  describe 'class registering', ->
+    it 'should register a class as its instance', ->
+      deps = container()
+      class Test
+        abc : {
+          a: "a"
+        }
 
-				b: "b"
+        b: "b"
 
-				doSomething : ()=>
-					@a
-				
-			deps.registerClass "Test", Test
-			
-			deps.resolve (test, Test)->
-				assert test.abc.a, "a"
-				assert test.b, "b"
-				assert test.doSomething, "a"
-				assert typeof Test, "function"
+        doSomething : ()=>
+          @a
         
+      deps.registerClass "Test", Test
+      
+      deps.resolve (test, Test)->
+        assert test.abc.a, "a"
+        assert test.b, "b"
+        assert test.doSomething, "a"
+        assert typeof Test, "function"
+  
+    it 'should inject dependencies into the class instance', ->
+      deps = container()
+      class Test
+        constructor: (abc)->
+          @abc = abc
+        abc: null
+        
+        doSomething: ()->
+          assert @abc, "abc"
+          
+      deps.register "abc", "abc"
+      deps.registerClass "Test", Test
+      
+      deps.resolve (test)->
+        test.doSomething()
+  
   describe 'class file', ->
     it 'should load a class from a file'
